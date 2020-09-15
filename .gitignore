@@ -1,0 +1,5 @@
+.vscode/
+Scripts/*
+*.pyc
+venv/
+connection.ini
