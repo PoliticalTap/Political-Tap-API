@@ -3,3 +3,4 @@ Scripts/*
 *.pyc
 venv/
 connection.ini
+config.py
