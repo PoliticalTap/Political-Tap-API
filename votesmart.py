@@ -200,7 +200,6 @@ class votesmart(object):
             params["o"] = "JSON"
             url = 'http://api.votesmart.org/%s' % func
 
-            print("about to make request: %s" % url)
             r = requests.get(url, params=params)
             obj = r.json()
 

@@ -13,7 +13,7 @@ def get_candidate_list():
     zip4 = request.args.get("zip4")
     candidates = Votesmart.candidates.getByZip(zip, zip4)
 
-    output = {}
+    elections = {}
 
     for candidate in candidates:
 
@@ -34,124 +34,147 @@ def get_candidate_list():
             }
         }
         
-        if (election_office in output.keys()):
-            output[election_office].append(candidate_obj)
+        if (election_office in elections.keys()):
+            elections[election_office].append(candidate_obj)
         else:
-            output[election_office] = [candidate_obj]
+            elections[election_office] = [candidate_obj]
 
+    output = []
+    for election in elections.keys():
+        print(election)
+        elect_item = {
+            "election" : election,
+            "candidates" : elections[election]
+        }
+        output.append(elect_item)
+    
     return json.dumps(output)
 
 @app.route("/testCandidate", methods=["GET"])
 def test_get_candidate_list():
-    return {
-        "President": [
-            {
-                "candidate_id": "53279",
-                "name": "Joe Biden",
-                "party": "Democratic",
-                "running_mate": {
-                    "candidate_id": "120012",
-                    "name": "Kamala Devi Harris"
+    return '''
+    [
+        {
+            "election": "President",
+            "candidates": [
+                {
+                    "candidate_id": "53279",
+                    "name": "Joe Biden",
+                    "party": "Democratic",
+                    "running_mate": {
+                        "candidate_id": "120012",
+                        "name": "Kamala Devi Harris"
+                    }
+                },
+                {
+                    "candidate_id": "15723",
+                    "name": "Donald J. Trump",
+                    "party": "Republican",
+                    "running_mate": {
+                        "candidate_id": "34024",
+                        "name": "Mike Pence"
+                    }
                 }
-            },
-            {
-                "candidate_id": "15723",
-                "name": "Donald J. Trump",
-                "party": "Republican",
-                "running_mate": {
-                    "candidate_id": "34024",
-                    "name": "Mike Pence"
+            ]
+        },
+        {
+            "election": "U.S. House",
+            "candidates": [
+                {
+                    "candidate_id": "166760",
+                    "name": "Warren Davidson",
+                    "party": "Republican",
+                    "running_mate": {
+                        "candidate_id": "",
+                        "name": ""
+                    }
+                },
+                {
+                    "candidate_id": "178848",
+                    "name": "Vanessa Enoch",
+                    "party": "Democratic",
+                    "running_mate": {
+                        "candidate_id": "",
+                        "name": ""
+                    }
                 }
-            }
-        ],
-        "U.S. House": [
-            {
-                "candidate_id": "166760",
-                "name": "Warren Davidson",
-                "party": "Republican",
-                "running_mate": {
-                    "candidate_id": "",
-                    "name": ""
+            ]
+        },
+        {
+            "election": "State House",
+            "candidates": [
+                {
+                    "candidate_id": "179097",
+                    "name": "Sara Carruthers",
+                    "party": "Republican",
+                    "running_mate": {
+                        "candidate_id": "",
+                        "name": ""
+                    }
+                },
+                {
+                    "candidate_id": "189460",
+                    "name": "Jennifer L. Gross",
+                    "party": "Republican",
+                    "running_mate": {
+                        "candidate_id": "",
+                        "name": ""
+                    }
+                },
+                {
+                    "candidate_id": "189459",
+                    "name": "Chuck Horn",
+                    "party": "Democratic",
+                    "running_mate": {
+                        "candidate_id": "",
+                        "name": ""
+                    }
+                },
+                {
+                    "candidate_id": "189462",
+                    "name": "Thomas Hall",
+                    "party": "Republican",
+                    "running_mate": {
+                        "candidate_id": "",
+                        "name": ""
+                    }
+                },
+                {
+                    "candidate_id": "189464",
+                    "name": "Michelle E. Novak",
+                    "party": "Democratic",
+                    "running_mate": {
+                        "candidate_id": "",
+                        "name": ""
+                    }
                 }
-            },
-            {
-                "candidate_id": "178848",
-                "name": "Vanessa Enoch",
-                "party": "Democratic",
-                "running_mate": {
-                    "candidate_id": "",
-                    "name": ""
+            ]
+        },
+        {
+            "election": "State Senate",
+            "candidates": [
+                {
+                    "candidate_id": "78001",
+                    "name": "George F. Lang",
+                    "party": "Republican",
+                    "running_mate": {
+                        "candidate_id": "",
+                        "name": ""
+                    }
+                },
+                {
+                    "candidate_id": "179098",
+                    "name": "Kathy Wyenandt",
+                    "party": "Democratic",
+                    "running_mate": {
+                        "candidate_id": "",
+                        "name": ""
+                    }
                 }
-            }
-        ],
-        "State House": [
-            {
-                "candidate_id": "179097",
-                "name": "Sara Carruthers",
-                "party": "Republican",
-                "running_mate": {
-                    "candidate_id": "",
-                    "name": ""
-                }
-            },
-            {
-                "candidate_id": "189460",
-                "name": "Jennifer L. Gross",
-                "party": "Republican",
-                "running_mate": {
-                    "candidate_id": "",
-                    "name": ""
-                }
-            },
-            {
-                "candidate_id": "189459",
-                "name": "Chuck Horn",
-                "party": "Democratic",
-                "running_mate": {
-                    "candidate_id": "",
-                    "name": ""
-                }
-            },
-            {
-                "candidate_id": "189462",
-                "name": "Thomas Hall",
-                "party": "Republican",
-                "running_mate": {
-                    "candidate_id": "",
-                    "name": ""
-                }
-            },
-            {
-                "candidate_id": "189464",
-                "name": "Michelle E. Novak",
-                "party": "Democratic",
-                "running_mate": {
-                    "candidate_id": "",
-                    "name": ""
-                }
-            }
-        ],
-        "State Senate": [
-            {
-                "candidate_id": "78001",
-                "name": "George F. Lang",
-                "party": "Republican",
-                "running_mate": {
-                    "candidate_id": "",
-                    "name": ""
-                }
-            },
-            {
-                "candidate_id": "179098",
-                "name": "Kathy Wyenandt",
-                "party": "Democratic",
-                "running_mate": {
-                    "candidate_id": "",
-                    "name": ""
-                }
-            }
-        ]
-    }
-
+            ]
+        }
+    ]
+    '''
+    
 if __name__ == "__main__":
     app.run(debug=True)
