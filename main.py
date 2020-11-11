@@ -14,34 +14,44 @@ def get_candidate_list():
     candidates = Votesmart.candidates.getByZip(zip, zip4)
 
     elections = {}
+    candidate_list = {}
 
     for candidate in candidates:
+        parsed_candidate = candidate_list.get(candidate.candidateId)
 
-        if (candidate.electionStatus != "Running"):
+        if (parsed_candidate):
             continue
+        else:
+            candidate_list[candidate.candidateId] = True
 
         election_office = candidate.electionOffice
 
-        # TODO: Do not include null running mate
+        candidate_bio = Votesmart.candidatebio.getBio(candidate.candidateId)
+        photo = candidate_bio.photo
+
         candidate_obj = {
             "candidate_id" : candidate.candidateId,
             "name" : candidate.ballotName,
             "party" : candidate.electionParties,
-            "running_mate" :
-            {
+            "photo" : candidate_bio.photo
+        }
+
+        if candidate.runningMateId:
+            running_mate = {
                 "candidate_id" : candidate.runningMateId,
                 "name" : candidate.runningMateName
             }
-        }
+
+            candidate_obj["running_mate"] = running_mate
+
         
-        if (election_office in elections.keys()):
+        if (election_office in elections.keys() and candidate.candidateId not in elections[election_office]):
             elections[election_office].append(candidate_obj)
         else:
             elections[election_office] = [candidate_obj]
 
     output = []
     for election in elections.keys():
-        print(election)
         elect_item = {
             "election" : election,
             "candidates" : elections[election]
@@ -49,6 +59,32 @@ def get_candidate_list():
         output.append(elect_item)
     
     return json.dumps(output)
+
+@app.route("/getCandidate", methods=["GET"])
+def get_candidate():
+    candidate_id = request.args.get("candidate_id")
+    candidate = Votesmart.candidatebio.getDetailedBio(candidate_id)
+
+    bio = candidate["bio"]
+
+    candidate_obj = {
+        "name" : bio["election"]["ballotName"],
+        "photo" : bio["candidate"]["photo"],
+        "birthDate" : bio["candidate"]["birthDate"],
+        "gender" : bio["candidate"]["gender"],
+        "religion" : bio["candidate"]["religion"],
+        "homeCity" : bio["candidate"]["homeCity"],
+        "homeState" : bio["candidate"]["homeState"],
+        "education" : bio["candidate"]["education"]["institution"],
+        "profession" : bio["candidate"]["profession"]["experience"],
+        "political" : bio["candidate"]["political"]["experience"],
+        "orgMembership" : bio["candidate"]["orgMembership"]["experience"],
+        "family" : bio["candidate"]["family"],
+        "office" : bio["office"],
+        "party" : bio["election"]["parties"]
+    }
+
+    return candidate_obj
 
 @app.route("/testCandidate", methods=["GET"])
 def test_get_candidate_list():
@@ -61,6 +97,7 @@ def test_get_candidate_list():
                     "candidate_id": "53279",
                     "name": "Joe Biden",
                     "party": "Democratic",
+                    "photo": "https://static.votesmart.org/canphoto/53279.jpg",
                     "running_mate": {
                         "candidate_id": "120012",
                         "name": "Kamala Devi Harris"
@@ -70,6 +107,7 @@ def test_get_candidate_list():
                     "candidate_id": "15723",
                     "name": "Donald J. Trump",
                     "party": "Republican",
+                    "photo": "https://static.votesmart.org/canphoto/15723.jpg",
                     "running_mate": {
                         "candidate_id": "34024",
                         "name": "Mike Pence"
@@ -84,19 +122,25 @@ def test_get_candidate_list():
                     "candidate_id": "166760",
                     "name": "Warren Davidson",
                     "party": "Republican",
-                    "running_mate": {
-                        "candidate_id": "",
-                        "name": ""
-                    }
+                    "photo": "https://static.votesmart.org/canphoto/166760.jpg"
                 },
                 {
                     "candidate_id": "178848",
                     "name": "Vanessa Enoch",
                     "party": "Democratic",
-                    "running_mate": {
-                        "candidate_id": "",
-                        "name": ""
-                    }
+                    "photo": "https://static.votesmart.org/canphoto/178848.jpg"
+                },
+                {
+                    "candidate_id": "150575",
+                    "name": "Matt Guyette",
+                    "party": "Democratic",
+                    "photo": "https://static.votesmart.org/canphoto/150575.jpg"
+                },
+                {
+                    "candidate_id": "167042",
+                    "name": "Edward Meer",
+                    "party": "Republican",
+                    "photo": "https://static.votesmart.org/canphoto/167042.jpg"
                 }
             ]
         },
@@ -107,46 +151,55 @@ def test_get_candidate_list():
                     "candidate_id": "179097",
                     "name": "Sara Carruthers",
                     "party": "Republican",
-                    "running_mate": {
-                        "candidate_id": "",
-                        "name": ""
-                    }
+                    "photo": "https://static.votesmart.org/canphoto/179097.jpg"
                 },
                 {
                     "candidate_id": "189460",
                     "name": "Jennifer L. Gross",
                     "party": "Republican",
-                    "running_mate": {
-                        "candidate_id": "",
-                        "name": ""
-                    }
+                    "photo": ""
                 },
                 {
                     "candidate_id": "189459",
                     "name": "Chuck Horn",
                     "party": "Democratic",
-                    "running_mate": {
-                        "candidate_id": "",
-                        "name": ""
-                    }
+                    "photo": ""
+                },
+                {
+                    "candidate_id": "161531",
+                    "name": "Mark S. Welch",
+                    "party": "Republican",
+                    "photo": ""
+                },
+                {
+                    "candidate_id": "189463",
+                    "name": "Brett Guido",
+                    "party": "Republican",
+                    "photo": ""
                 },
                 {
                     "candidate_id": "189462",
                     "name": "Thomas Hall",
                     "party": "Republican",
-                    "running_mate": {
-                        "candidate_id": "",
-                        "name": ""
-                    }
+                    "photo": ""
+                },
+                {
+                    "candidate_id": "189461",
+                    "name": "Diane Mullins",
+                    "party": "Republican",
+                    "photo": ""
                 },
                 {
                     "candidate_id": "189464",
                     "name": "Michelle E. Novak",
                     "party": "Democratic",
-                    "running_mate": {
-                        "candidate_id": "",
-                        "name": ""
-                    }
+                    "photo": ""
+                },
+                {
+                    "candidate_id": "120535",
+                    "name": "Jeffrey L. Wellbaum",
+                    "party": "Republican",
+                    "photo": "https://static.votesmart.org/canphoto/120535.jpg"
                 }
             ]
         },
@@ -154,22 +207,28 @@ def test_get_candidate_list():
             "election": "State Senate",
             "candidates": [
                 {
+                    "candidate_id": "167037",
+                    "name": "Candice Keller",
+                    "party": "Republican",
+                    "photo": "https://static.votesmart.org/canphoto/167037.jpg"
+                },
+                {
                     "candidate_id": "78001",
                     "name": "George F. Lang",
                     "party": "Republican",
-                    "running_mate": {
-                        "candidate_id": "",
-                        "name": ""
-                    }
+                    "photo": "https://static.votesmart.org/canphoto/78001.jpg"
+                },
+                {
+                    "candidate_id": "78002",
+                    "name": "Lee Wong",
+                    "party": "Republican",
+                    "photo": ""
                 },
                 {
                     "candidate_id": "179098",
                     "name": "Kathy Wyenandt",
                     "party": "Democratic",
-                    "running_mate": {
-                        "candidate_id": "",
-                        "name": ""
-                    }
+                    "photo": "https://static.votesmart.org/canphoto/179098.jpg"
                 }
             ]
         }
