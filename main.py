@@ -88,12 +88,12 @@ def get_candidate():
         "religion" : cand["religion"],
         "homeCity" : cand["homeCity"],
         "homeState" : cand["homeState"],
-        "education" : cand.get("education", {}).get("institution"),
-        "profession" : cand["profession"]["experience"],
-        "political" : cand["political"]["experience"],
-        "orgMembership" : cand.get("orgMembership", {}).get("experience"),
+        "education" : cand.get("education"),
+        "profession" : cand.get("profession"),
+        "political" : cand.get("political"),
+        "orgMembership" : cand.get("orgMembership"),
         "family" : cand.get("family"),
-        "office" : bio.get("office"),
+        "office" : bio.get("office", ""),
         "party" : party
     }
 
