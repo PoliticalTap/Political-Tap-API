@@ -66,22 +66,35 @@ def get_candidate():
     candidate = Votesmart.candidatebio.getDetailedBio(candidate_id)
 
     bio = candidate["bio"]
+    cand = bio["candidate"]
+
+    if "election" in bio:
+        name = bio["election"]["ballotName"]
+        party = bio["election"]["parties"]
+    else:
+        name = "%s %s" % (bio["candidate"]["firstName"], bio["candidate"]["lastName"])
+        if "office" in bio:
+            party = bio["office"]["parties"]
+        else:
+            party = "Currently Unaffiliated"
+
+    # Get ballot name
 
     candidate_obj = {
-        "name" : bio["election"]["ballotName"],
-        "photo" : bio["candidate"]["photo"],
-        "birthDate" : bio["candidate"]["birthDate"],
-        "gender" : bio["candidate"]["gender"],
-        "religion" : bio["candidate"]["religion"],
-        "homeCity" : bio["candidate"]["homeCity"],
-        "homeState" : bio["candidate"]["homeState"],
-        "education" : bio["candidate"]["education"]["institution"],
-        "profession" : bio["candidate"]["profession"]["experience"],
-        "political" : bio["candidate"]["political"]["experience"],
-        "orgMembership" : bio["candidate"]["orgMembership"]["experience"],
-        "family" : bio["candidate"]["family"],
-        "office" : bio["office"],
-        "party" : bio["election"]["parties"]
+        "name" : name,
+        "photo" : cand["photo"],
+        "birthDate" : cand["birthDate"],
+        "gender" : cand["gender"],
+        "religion" : cand["religion"],
+        "homeCity" : cand["homeCity"],
+        "homeState" : cand["homeState"],
+        "education" : cand.get("education", {}).get("institution"),
+        "profession" : cand["profession"]["experience"],
+        "political" : cand["political"]["experience"],
+        "orgMembership" : cand.get("orgMembership", {}).get("experience"),
+        "family" : cand.get("family"),
+        "office" : bio.get("office"),
+        "party" : party
     }
 
     return candidate_obj
