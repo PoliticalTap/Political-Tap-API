@@ -2,6 +2,14 @@ from app import app
 from flask import render_template, request
 from votesmart import votesmart as Votesmart
 import json
+import tweepy
+
+# Twitter 
+twitter_auth = tweepy.OAuthHandler(app.config["TWITTER_KEY"], app.config["TWITTER_SECRET"])
+twitter_auth.set_access_token(app.config["TWITTER_ACCESS_TOKEN"], app.config["TWITTER_ACCESS_TOKEN_SECRET"])
+
+# Initialize Tweepy Library
+Tweepy = tweepy.API(twitter_auth)
 
 @app.route("/")
 def index():
@@ -98,6 +106,48 @@ def get_candidate():
     }
 
     return candidate_obj
+
+@app.route("/getCandidateTweets", methods=["GET"])
+def get_candidate_tweets():
+    candidate_id = request.args.get("candidate_id")
+    print(candidate_id)
+
+    try:
+        for adr in Votesmart.address.getOfficeWebAddress(candidate_id):
+            address = str(adr)
+
+            if "twitter" in address.lower():
+                screen_name = address.split("/")[-1]
+                screen_name = screen_name.split("?")[0]
+    except:
+        try:
+            for adr in Votesmart.address.getCampaignWebAddress(candidate_id):
+                address = str(adr)
+
+                if "twitter" in address.lower():
+                    screen_name = address.split("/")[-1]
+                    screen_name = screen_name.split("?")[0]
+        except:
+            return {
+                "error" : "Web Addresses not available for this candidate",
+                "tweets" : []
+            }
+    
+    print(screen_name)
+
+    if screen_name == None:
+        return {
+            "error" : "Twitter account not available for this candidate",
+            "tweets" : []
+        }
+    
+    tweet_list = Tweepy.user_timeline(screen_name=screen_name, count=10)
+    tweets = []
+    
+    for tweet in tweet_list:
+        tweets.append(tweet._json)
+    
+    return {"tweets" : tweets}
 
 @app.route("/testCandidate", methods=["GET"])
 def test_get_candidate_list():
