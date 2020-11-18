@@ -89,6 +89,7 @@ def get_candidate():
     # Get ballot name
 
     candidate_obj = {
+        "candidate_id" : candidate_id,
         "name" : name,
         "photo" : cand["photo"],
         "birthDate" : cand["birthDate"],
