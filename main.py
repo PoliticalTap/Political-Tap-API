@@ -11,6 +11,10 @@ twitter_auth.set_access_token(app.config["TWITTER_ACCESS_TOKEN"], app.config["TW
 # Initialize Tweepy Library
 Tweepy = tweepy.API(twitter_auth)
 
+# Location Service
+from geopy.geocoders import Nominatim
+geocoder = Nominatim(user_agent = 'test_app')
+
 @app.route("/")
 def index():
     return render_template("index.html")
@@ -149,6 +153,19 @@ def get_candidate_tweets():
         tweets.append(tweet._json)
     
     return {"tweets" : tweets}
+
+@app.route("/getZipFromLocation")
+def get_zip_from_location():
+    latitude = request.args.get("latitude", 0)
+    longitude = request.args.get("longitude", 0)
+
+    try:
+        location = geocoder.reverse((latitude, longitude))
+        zip = location.raw["address"]["postcode"]
+    except:
+        return "Could not get zipcode"
+
+    return zip
 
 @app.route("/testCandidate", methods=["GET"])
 def test_get_candidate_list():
