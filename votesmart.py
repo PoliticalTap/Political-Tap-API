@@ -305,8 +305,8 @@ class votesmart(object):
             return _result_to_obj(Candidate, result['candidateList']['candidate'])
 
         @staticmethod
-        def getByZip(zip5, zip4=None):
-            params = {'zip4': zip4, 'zip5': zip5}
+        def getByZip(zip5, zip4=None, year=2020):
+            params = {'zip4': zip4, 'zip5': zip5, "electionYear": year}
             result = votesmart._apicall('Candidates.getByZip', params)
             return _result_to_obj(Candidate, result['candidateList']['candidate'])
 
