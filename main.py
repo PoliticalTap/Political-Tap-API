@@ -167,154 +167,51 @@ def get_zip_from_location():
 
     return zip
 
-@app.route("/testCandidate", methods=["GET"])
-def test_get_candidate_list():
-    return '''
-    [
-        {
-            "election": "President",
-            "candidates": [
-                {
-                    "candidate_id": "53279",
-                    "name": "Joe Biden",
-                    "party": "Democratic",
-                    "photo": "https://static.votesmart.org/canphoto/53279.jpg",
-                    "running_mate": {
-                        "candidate_id": "120012",
-                        "name": "Kamala Devi Harris"
-                    }
-                },
-                {
-                    "candidate_id": "15723",
-                    "name": "Donald J. Trump",
-                    "party": "Republican",
-                    "photo": "https://static.votesmart.org/canphoto/15723.jpg",
-                    "running_mate": {
-                        "candidate_id": "34024",
-                        "name": "Mike Pence"
-                    }
-                }
-            ]
-        },
-        {
-            "election": "U.S. House",
-            "candidates": [
-                {
-                    "candidate_id": "166760",
-                    "name": "Warren Davidson",
-                    "party": "Republican",
-                    "photo": "https://static.votesmart.org/canphoto/166760.jpg"
-                },
-                {
-                    "candidate_id": "178848",
-                    "name": "Vanessa Enoch",
-                    "party": "Democratic",
-                    "photo": "https://static.votesmart.org/canphoto/178848.jpg"
-                },
-                {
-                    "candidate_id": "150575",
-                    "name": "Matt Guyette",
-                    "party": "Democratic",
-                    "photo": "https://static.votesmart.org/canphoto/150575.jpg"
-                },
-                {
-                    "candidate_id": "167042",
-                    "name": "Edward Meer",
-                    "party": "Republican",
-                    "photo": "https://static.votesmart.org/canphoto/167042.jpg"
-                }
-            ]
-        },
-        {
-            "election": "State House",
-            "candidates": [
-                {
-                    "candidate_id": "179097",
-                    "name": "Sara Carruthers",
-                    "party": "Republican",
-                    "photo": "https://static.votesmart.org/canphoto/179097.jpg"
-                },
-                {
-                    "candidate_id": "189460",
-                    "name": "Jennifer L. Gross",
-                    "party": "Republican",
-                    "photo": ""
-                },
-                {
-                    "candidate_id": "189459",
-                    "name": "Chuck Horn",
-                    "party": "Democratic",
-                    "photo": ""
-                },
-                {
-                    "candidate_id": "161531",
-                    "name": "Mark S. Welch",
-                    "party": "Republican",
-                    "photo": ""
-                },
-                {
-                    "candidate_id": "189463",
-                    "name": "Brett Guido",
-                    "party": "Republican",
-                    "photo": ""
-                },
-                {
-                    "candidate_id": "189462",
-                    "name": "Thomas Hall",
-                    "party": "Republican",
-                    "photo": ""
-                },
-                {
-                    "candidate_id": "189461",
-                    "name": "Diane Mullins",
-                    "party": "Republican",
-                    "photo": ""
-                },
-                {
-                    "candidate_id": "189464",
-                    "name": "Michelle E. Novak",
-                    "party": "Democratic",
-                    "photo": ""
-                },
-                {
-                    "candidate_id": "120535",
-                    "name": "Jeffrey L. Wellbaum",
-                    "party": "Republican",
-                    "photo": "https://static.votesmart.org/canphoto/120535.jpg"
-                }
-            ]
-        },
-        {
-            "election": "State Senate",
-            "candidates": [
-                {
-                    "candidate_id": "167037",
-                    "name": "Candice Keller",
-                    "party": "Republican",
-                    "photo": "https://static.votesmart.org/canphoto/167037.jpg"
-                },
-                {
-                    "candidate_id": "78001",
-                    "name": "George F. Lang",
-                    "party": "Republican",
-                    "photo": "https://static.votesmart.org/canphoto/78001.jpg"
-                },
-                {
-                    "candidate_id": "78002",
-                    "name": "Lee Wong",
-                    "party": "Republican",
-                    "photo": ""
-                },
-                {
-                    "candidate_id": "179098",
-                    "name": "Kathy Wyenandt",
-                    "party": "Democratic",
-                    "photo": "https://static.votesmart.org/canphoto/179098.jpg"
-                }
-            ]
-        }
-    ]
-    '''
+@app.route("/getFeedFromLocation", methods=["GET"])
+def get_feed_from_location():
+    zip = request.args.get("zip")
+    zip4 = request.args.get("zip4")
+
+    # Get list of candidates
+    candidates = Votesmart.candidates.getByZip(zip, zip4)
+
+    # Get twitter from candidates
+    twitter_ids = []
+
+    for candidate in candidates:
+        candidate_id = candidate.candidateId
+        try:
+            for adr in Votesmart.address.getOfficeWebAddress(candidate_id):
+                address = str(adr)
+
+                if "twitter" in address.lower():
+                    screen_name = address.split("/")[-1]
+                    screen_name = screen_name.split("?")[0]
+
+                    twitter_ids.append(screen_name)
+        except:
+            try:
+                for adr in Votesmart.address.getCampaignWebAddress(candidate_id):
+                    address = str(adr)
+
+                    if "twitter" in address.lower():
+                        screen_name = address.split("/")[-1]
+                        screen_name = screen_name.split("?")[0]
+
+                        twitter_ids.append(screen_name)
+            except:
+                print("No office or campaign web addresses found for: %s" % candidate_id)
+
+    # Get timeline for each candidate
+    tweets = []
+    for screen_name in twitter_ids:
+        tweet_list = Tweepy.user_timeline(screen_name=screen_name, count=5)
+        
+        for tweet in tweet_list:
+            tweets.append(tweet._json)
+
+    # Return merged timelines
+    return {"tweets" : tweets}
     
 if __name__ == "__main__":
     app.run(debug=True)
