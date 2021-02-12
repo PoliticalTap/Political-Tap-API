@@ -177,9 +177,19 @@ def get_feed_from_location():
 
     # Get twitter from candidates
     twitter_ids = []
+    candidate_list = {}
 
     for candidate in candidates:
+
         candidate_id = candidate.candidateId
+        parsed_candidate = candidate_list.get(candidate_id)
+
+        # Prevent duplicate candidates from being appended
+        if (parsed_candidate):
+            continue
+        else:
+            candidate_list[candidate_id] = True
+
         try:
             for adr in Votesmart.address.getOfficeWebAddress(candidate_id):
                 address = str(adr)
