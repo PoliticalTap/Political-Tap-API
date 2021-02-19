@@ -110,6 +110,10 @@ def get_candidate():
         "party" : party
     }
 
+    for k in candidate_obj.keys():
+        if (candidate_obj[k] == ""):
+            candidate_obj[k] = "No information available"
+
     return candidate_obj
 
 @app.route("/getCandidateTweets", methods=["GET"])
