@@ -111,6 +111,8 @@ def get_candidate():
     }
 
     for k in candidate_obj.keys():
+        if (k == "photo"):
+            continue
         if (candidate_obj[k] == ""):
             candidate_obj[k] = "No information available"
 
