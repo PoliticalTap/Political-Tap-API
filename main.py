@@ -226,6 +226,8 @@ def get_feed_from_location():
         for tweet in tweet_list:
             tweets.append(tweet._json)
 
+    tweets = sorted(tweets, key=lambda k: k['id'], reverse=True)
+
     # Return merged timelines
     return {"tweets" : tweets}
     
