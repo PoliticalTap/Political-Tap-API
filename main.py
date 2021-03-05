@@ -230,6 +230,85 @@ def get_feed_from_location():
 
     # Return merged timelines
     return {"tweets" : tweets}
+
+@app.route("/getCandidateVoteHistory", methods=["GET"])
+def get_candidate_vote_history():
+    candidate_id = request.args.get("candidate_id")
+
+    try:
+        bills = Votesmart.votes.getBillsByOfficial(candidate_id)
+    except:
+        return json.dumps([])
     
+    voteCode = {
+        "Y" : "Yes",
+        "N" : "No",
+        "C" : "Co-Sponsor",
+        "S" : "Sponsor",
+        "-" : "Did Not Vote"
+    }
+
+    vote_history = []
+    for bill in bills:
+        if bill.title == "":
+            continue
+
+        vote = voteCode.get(bill.vote, "Unknown Vote")
+
+        vote_record = {
+            "billNumber" : bill.billNumber,
+            "billTitle" : bill.title,
+            "vote" : vote,
+            "stage" : bill.stage
+        }
+
+        vote_history.append(vote_record)
+
+    return json.dumps(vote_history)
+
+@app.route("/getOfficialsList", methods=["GET"])
+def get_officials_list():
+    zip = request.args.get("zip")
+    zip4 = request.args.get("zip4")
+    candidates = Votesmart.officials.getByZip(zip, zip4)
+
+    elections = {}
+    candidate_list = {}
+
+    for candidate in candidates:
+        parsed_candidate = candidate_list.get(candidate.candidateId)
+
+        if (parsed_candidate):
+            continue
+        else:
+            candidate_list[candidate.candidateId] = True
+
+        election_office = candidate.officeName
+
+        candidate_bio = Votesmart.candidatebio.getBio(candidate.candidateId)
+        photo = candidate_bio.photo
+
+        candidate_obj = {
+            "candidate_id" : candidate.candidateId,
+            "name" : candidate.firstName + " " + candidate.lastName,
+            "party" : candidate.officeParties,
+            "photo" : candidate_bio.photo
+        }
+        
+        if (election_office in elections.keys() and candidate.candidateId not in elections[election_office]):
+            elections[election_office].append(candidate_obj)
+        else:
+            elections[election_office] = [candidate_obj]
+
+    output = []
+    for election in elections.keys():
+        elect_item = {
+            "election" : election,
+            "candidates" : elections[election]
+        }
+        output.append(elect_item)
+    
+    return json.dumps(output)
+
 if __name__ == "__main__":
     app.run(debug=True)

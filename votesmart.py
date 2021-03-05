@@ -603,9 +603,9 @@ class votesmart(object):
             return _result_to_obj(Bill, result['bills']['bill'])
 
         @staticmethod
-        def getBillsByOfficial(candidateId, year, officeId=None, categoryId=None):
+        def getBillsByOfficial(candidateId, year=None, officeId=None, categoryId=None):
             params = {'candidateId':candidateId, 'year':year, 'officeId':officeId, 'categoryId':categoryId}
-            result = votesmart._apicall('Votes.getBillsByOfficial', params)
+            result = votesmart._apicall('Votes.getByOfficial', params)
             return _result_to_obj(Bill, result['bills']['bill'])
 
         @staticmethod
