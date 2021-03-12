@@ -310,5 +310,40 @@ def get_officials_list():
     
     return json.dumps(output)
 
+@app.route("/getSocialMediaLinks", methods=["GET"])
+def get_social_media_links():
+    candidate_id = request.args.get("candidate_id")
+
+    social_media_list = ["twitter", "facebook", "instagram", "youtube", "linkedin"]
+
+    social_media_links = {
+        "campaign" : [], 
+        "office": []
+    }
+
+    try:
+        for adr in Votesmart.address.getCampaignWebAddress(candidate_id):
+            address = str(adr)
+
+            for social_media in social_media_list:
+                if social_media in address.lower():
+                    social_media_link = {"address" : address, "type" : social_media}
+                    social_media_links["campaign"].append(social_media_link)
+    except:
+        print("No campaign web addresses")
+
+    try:
+        for adr in Votesmart.address.getOfficeWebAddress(candidate_id):
+            address = str(adr)
+
+            for social_media in social_media_list:
+                if social_media in address.lower():
+                    social_media_link = {"address" : address, "type" : social_media}
+                    social_media_links["office"].append(social_media_link)
+    except:
+        print("No office web addresses")
+    
+    return json.dumps(social_media_links)
+
 if __name__ == "__main__":
     app.run(debug=True)
