@@ -162,13 +162,24 @@ def get_candidate_tweets():
 
 @app.route("/getZipFromLocation")
 def get_zip_from_location():
-    latitude = request.args.get("latitude", 0)
-    longitude = request.args.get("longitude", 0)
+    latitude = str(request.args.get("latitude", 0))
+    longitude = str(request.args.get("longitude", 0))
 
     try:
+        lat_split = latitude.split(".")
+        lon_split = longitude.split(".")
+
+        # Limit length past the decimal to 2 places
+        lat_split[1] = lat_split[1][0:2]
+        lon_split[1] = lon_split[1][0:2]
+
+        latitude = lat_split[0] + "." + lat_split[1]
+        longitude = lon_split[0] + "." + lon_split[1]
+
         location = geocoder.reverse((latitude, longitude))
         zip = location.raw["address"]["postcode"]
-    except:
+    except Exception as e:
+        print(e)
         return "Could not get zipcode"
 
     return zip
