@@ -122,6 +122,7 @@ def get_candidate():
 def get_candidate_tweets():
     candidate_id = request.args.get("candidate_id")
     print(candidate_id)
+    screen_name = 0
 
     try:
         for adr in Votesmart.address.getOfficeWebAddress(candidate_id):
@@ -143,10 +144,8 @@ def get_candidate_tweets():
                 "error" : "Web Addresses not available for this candidate",
                 "tweets" : []
             }
-    
-    print(screen_name)
 
-    if screen_name == None:
+    if screen_name == 0:
         return {
             "error" : "Twitter account not available for this candidate",
             "tweets" : []
